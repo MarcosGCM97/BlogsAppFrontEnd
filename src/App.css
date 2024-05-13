@@ -4,7 +4,7 @@
 }
 .App{
     background: #ffd791;
-    height: auto;
+    min-height: 100vh;
     width: 100%;
     display: flex;
     flex-direction: column;
@@ -17,6 +17,16 @@
     background-color: #d9e8ae;
     width: 95%;
     padding: 10px;
+    position: relative;
+}
+.btnSalir{
+    position: absolute;
+    right: 10px;
+    top: 15px;
+    padding: 5px;
+    background-color: transparent;
+    border-radius: 5px;
+    cursor: pointer;
 }
 
 .Form{
@@ -61,6 +71,8 @@
 }
 .UlListBlog{
     width: 80%;
+    margin: 5%;
+    padding: 5%;
     display: flex;
     justify-content: center;
     align-items: center;
@@ -101,4 +113,43 @@
     border: none;
     margin-bottom: 5px;
     font-size: 20px;
+}
+
+.loginForm{
+    padding: 30px;
+    height: auto;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    row-gap: 20px;
+    background-color: #31251bab;
+    border-radius: 10px;
+    color: #ffd791;
+}
+.loginForm h2{
+    text-shadow: 1px 1px 8px;
+}
+.loginDiv{
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: flex-start;
+}
+.loginInput{
+    border: none;
+    padding: 3px;
+}
+.loginButton{
+    padding: 4px;
+    font-weight: 800;
+    color: #5a4c34;
+    background-color: #ffd791;
+    border-radius: 10px;
+    border:solid 2px #2e271b;
+    transition: .5s;
+    cursor: pointer;
+    &:active{
+        scale: .8;
+    }
 }

@@ -3,6 +3,8 @@ import './App.css';
 import Form from './components/Form'
 import blogServices from './services/blogs'
 import AllBlogs from './components/AllBlogs';
+import LoginForm from './components/loginForm';
+import loginService from './services/login'
 
 // manejo de errores
 
@@ -13,13 +15,62 @@ function App() {
   const [newTitle, setTitle] = useState('')
   const [newUrl, setUrl] = useState('')
   const [newLike, setLike] = useState(0)
+  const [errorMessage, setErrorMessage] = useState(null)
   const [aux, setAux] = useState([]) //this variable was created for manage the useEffect Hook
+  //this 3 variables are for the handle login
+  const [username, setUsername] = useState('')
+  const [password, setPassword] = useState('')
+  const [user, setUser] = useState(null)
 
   useEffect(()=>{
     blogServices
       .getAll()
       .then(result => setBlog(result))
   }, [aux])
+
+
+  useEffect(() => {
+    const loggedUserJSON = window.localStorage.getItem('loggedBlogappUser')
+    if(loggedUserJSON){
+      const user = JSON.parse(loggedUserJSON)
+      setUser(user)
+      blogServices.setToken(user.token)
+    }
+  }, [])
+
+  const addLogin = async (event) =>{
+    event.preventDefault()
+    try{
+      const user = await loginService.login({
+        username, password
+      })
+
+      window.localStorage.setItem('loggedBlogappUser', JSON.stringify(user))
+      
+      blogServices.setToken(user.token)
+      setUser(user)
+      setUsername('')
+      setPassword('')
+    } catch (exeption) {
+      setErrorMessage('Wrong credentials')
+      setTimeout(()=>{
+        setErrorMessage(null)
+      }, 5000)
+    }
+  }  
+  const handleUser = (event) =>{
+    const target = event.target.value
+    setUsername(target)
+  }
+  const handlePassword = (event) =>{
+    const target = event.target.value
+    setPassword(target)    
+  }
+  const logOut = () =>{
+    setUser(null)
+    return window.localStorage.removeItem('loggedBlogappUser')
+  }
+
 
   const handleAuthor =(event)=>{
     setAuthor(event.target.value)
@@ -56,12 +107,15 @@ function App() {
 
     blogServices
       .deleteBlog(delete1)
+      .then(() => {
+        setBlog(newBlog.filter(blog => blog.id !== delete1))
+      })
       .then(result => setAux(result))
   }
 
   const addBlog =(event)=>{
     event.preventDefault();
-
+    
     const blogObject = {
       author: newAuthor.charAt(0).toUpperCase() + newAuthor.slice(1),
       title: newTitle.charAt(0).toUpperCase() + newTitle.slice(1),
@@ -91,25 +145,51 @@ function App() {
     setLike(false)
   }
 
-  return (
-    <div className="App">
-      <h1 className="h1Blogs">Blogs Apps 📝</h1>
+
+  const loginForm = () => {
+    return <LoginForm 
+      submitLogin={addLogin}
+      onChangeUser={handleUser}
+      onChangePassword={handlePassword}
+      username={username}
+      password={password}
+      error={errorMessage}
+  />
+  }
+  const blogForm = () => {
+    return <>
+      <h1 className="h1Blogs">
+        Blogs Apps 📝
+        <button onClick={logOut} className='btnSalir'>Log Out</button>
+      </h1>
       <h3 className="h3Save">Save your favorite blogs in this app</h3>
+      <p>{user.name} logged-in</p>
       <Form 
-        submitForm={addBlog}
-        valueAuthor={newAuthor}
-        changeAuthor={handleAuthor}
-        valueTitle={newTitle}
-        changeTitle={handleTitle}
-        valueUrl={newUrl}
-        changeUrl={handleUrl}
-      />  
-      <AllBlogs
+          submitForm={addBlog}
+          valueAuthor={newAuthor}
+          changeAuthor={handleAuthor}
+          valueTitle={newTitle}
+          changeTitle={handleTitle}
+          valueUrl={newUrl}
+          changeUrl={handleUrl}
+        />
+        <AllBlogs
           blogs={newBlog}
           newLike={newLike}
           like={handleLike}
           onDelete={onDelete}
       /> 
+    </>
+  
+  }
+
+  return (
+    <div className="App">
+      {
+        user === null ?
+          loginForm() :
+          blogForm()
+      }  
     </div>
   );
 }
